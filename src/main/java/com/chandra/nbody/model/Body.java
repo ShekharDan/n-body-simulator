@@ -25,4 +25,16 @@ public class Body {
         this.position = position;
         this.velocity = velocity;
     }
+
+    public void updateVelocity(
+            Vector3 velocity
+    ) {
+        this.velocity = velocity;
+    }
+
+    public void updatePosition(
+            Vector3 position
+    ) {
+        this.position = position;
+    }
 }
