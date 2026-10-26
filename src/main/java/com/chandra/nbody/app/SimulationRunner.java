@@ -37,6 +37,23 @@ public class SimulationRunner {
                         physicsEngine,
                         integrator
                 );
+        double kinetic =
+                physicsEngine.calculateKineticEnergy(earth)
+                        + physicsEngine.calculateKineticEnergy(moon);
+
+        double potential =
+                physicsEngine.calculatePotentialEnergy(
+                        earth,
+                        moon
+                );
+
+        double total =
+                kinetic + potential;
+
+        System.out.println(
+                "Total Energy = "
+                        + total
+        );
         for (int i = 0; i < 1000; i++) {
 
             simulation.step(1);
@@ -45,7 +62,23 @@ public class SimulationRunner {
                 System.out.println(
                         "Step " + i
                 );
+                double kineticAti =
+                        physicsEngine.calculateKineticEnergy(earth)
+                                + physicsEngine.calculateKineticEnergy(moon);
 
+                double potentialAti =
+                        physicsEngine.calculatePotentialEnergy(
+                                earth,
+                                moon
+                        );
+
+                double totalAti =
+                        kineticAti + potentialAti;
+
+                System.out.println(
+                        "Total Energy at "+ i+" = "
+                                + totalAti
+                );
                 System.out.println(
                         "Earth: " + earth.getPosition()
                 );

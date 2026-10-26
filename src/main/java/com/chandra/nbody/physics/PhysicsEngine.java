@@ -34,4 +34,38 @@ public class PhysicsEngine {
     ) {
         return force.scale(1.0 / mass);
     }
+    public double calculateKineticEnergy(
+            Body body
+    ) {
+
+        double speed =
+                body.getVelocity()
+                        .magnitude();
+
+        return 0.5
+                * body.getMass()
+                * speed
+                * speed;
+    }
+    public double calculatePotentialEnergy(
+            Body body1,
+            Body body2
+    ) {
+
+        double distance =
+                body2.getPosition()
+                        .subtract(
+                                body1.getPosition()
+                        )
+                        .magnitude();
+
+        return -(
+                G
+                        * body1.getMass()
+                        * body2.getMass()
+                        / distance
+        );
+    }
+
+
 }
