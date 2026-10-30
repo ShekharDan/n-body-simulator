@@ -3,93 +3,91 @@ package com.chandra.nbody.app;
 import com.chandra.nbody.integration.EulerIntegrator;
 import com.chandra.nbody.integration.Integrator;
 import com.chandra.nbody.model.Body;
-import com.chandra.nbody.model.Vector3;
 import com.chandra.nbody.physics.PhysicsEngine;
+import com.chandra.nbody.scenario.SolarSystemScenario;
 import com.chandra.nbody.simulation.Simulation;
 
 import java.util.List;
 
 public class SimulationRunner {
+
     public static void main(String[] args) {
-        Body earth =
-                new Body(
-                        5.972e24,
-                        new Vector3(0, 0, 0),
-                        new Vector3(0, 0, 0)
-                );
 
-        Body moon =
-                new Body(
-                        7.348e22,
-                        new Vector3(384400000, 0, 0),
-                        new Vector3(0, 1022, 0)
-                );
-
-        PhysicsEngine physicsEngine =
-                new PhysicsEngine();
-
-        Integrator integrator =
-                new EulerIntegrator();
-
-        Simulation simulation =
-                new Simulation(
-                        List.of(earth, moon),
-                        physicsEngine,
-                        integrator
-                );
-        double kinetic =
-                physicsEngine.calculateKineticEnergy(earth)
-                        + physicsEngine.calculateKineticEnergy(moon);
-
-        double potential =
-                physicsEngine.calculatePotentialEnergy(
-                        earth,
-                        moon
-                );
-
-        double total =
-                kinetic + potential;
+        double[] timeSteps = {
+                1,
+                10,
+                100,
+                1000
+        };
 
         System.out.println(
-                "Total Energy = "
-                        + total
+                "---------------------------------------------------------------"
         );
-        for (int i = 0; i < 1000; i++) {
 
-            simulation.step(1);
+        System.out.printf(
+                "%-10s %-25s %-25s %-20s%n",
+                "dt",
+                "Initial Energy",
+                "Final Energy",
+                "Drift (%)"
+        );
 
-            if (i % 100 == 0) {
-                System.out.println(
-                        "Step " + i
-                );
-                double kineticAti =
-                        physicsEngine.calculateKineticEnergy(earth)
-                                + physicsEngine.calculateKineticEnergy(moon);
+        System.out.println(
+                "---------------------------------------------------------------"
+        );
 
-                double potentialAti =
-                        physicsEngine.calculatePotentialEnergy(
-                                earth,
-                                moon
-                        );
+        for (double dt : timeSteps) {
 
-                double totalAti =
-                        kineticAti + potentialAti;
+            List<Body> bodies =
+                    SolarSystemScenario.createBodies();
 
-                System.out.println(
-                        "Total Energy at "+ i+" = "
-                                + totalAti
-                );
-                System.out.println(
-                        "Earth: " + earth.getPosition()
-                );
+            PhysicsEngine physicsEngine =
+                    new PhysicsEngine();
 
-                System.out.println(
-                        "Moon : " + moon.getPosition()
-                );
+            Integrator integrator =
+                    new EulerIntegrator();
 
-                System.out.println();
+            Simulation simulation =
+                    new Simulation(
+                            bodies,
+                            physicsEngine,
+                            integrator
+                    );
+
+            double initialEnergy =
+                    physicsEngine.calculateTotalEnergy(
+                            bodies
+                    );
+
+            int totalSteps = 1000;
+
+            for (int i = 0; i < totalSteps; i++) {
+                simulation.step(dt);
             }
+
+            double finalEnergy =
+                    physicsEngine.calculateTotalEnergy(
+                            bodies
+                    );
+
+            double driftPercentage =
+                    Math.abs(
+                            finalEnergy - initialEnergy
+                    )
+                            / Math.abs(initialEnergy)
+                            * 100;
+
+            System.out.printf(
+                    "%-10.0f %-25.6e %-25.6e %-20.12e%n",
+                    dt,
+                    initialEnergy,
+                    finalEnergy,
+                    driftPercentage
+            );
         }
 
+        System.out.println(
+                "---------------------------------------------------------------"
+        );
     }
 }

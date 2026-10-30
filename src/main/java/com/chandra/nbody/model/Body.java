@@ -2,11 +2,27 @@ package com.chandra.nbody.model;
 
 public class Body {
 
+    private final String name;
     private final double mass;
 
     private Vector3 position;
-
     private Vector3 velocity;
+
+    public Body(
+            String name,
+            double mass,
+            Vector3 position,
+            Vector3 velocity
+    ) {
+        this.name = name;
+        this.mass = mass;
+        this.position = position;
+        this.velocity = velocity;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public double getMass() {
         return mass;
@@ -18,12 +34,6 @@ public class Body {
 
     public Vector3 getVelocity() {
         return velocity;
-    }
-
-    public Body(double mass, Vector3 position, Vector3 velocity) {
-        this.mass = mass;
-        this.position = position;
-        this.velocity = velocity;
     }
 
     public void updateVelocity(
