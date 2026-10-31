@@ -6,88 +6,194 @@ import com.chandra.nbody.model.Body;
 import com.chandra.nbody.physics.PhysicsEngine;
 import com.chandra.nbody.scenario.SolarSystemScenario;
 import com.chandra.nbody.simulation.Simulation;
+import com.chandra.nbody.visualization.EnergyDriftPlotter;
+import com.chandra.nbody.visualization.OrbitData;
+import com.chandra.nbody.visualization.OrbitPlotter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SimulationRunner {
 
     public static void main(String[] args) {
 
-        double[] timeSteps = {
-                1,
-                10,
-                100,
-                1000
-        };
+        // -----------------------------
+        // Orbit Visualizations
+        // -----------------------------
 
-        System.out.println(
-                "---------------------------------------------------------------"
-        );
+        List<Body> bodies =
+                SolarSystemScenario.createBodies();
 
-        System.out.printf(
-                "%-10s %-25s %-25s %-20s%n",
-                "dt",
-                "Initial Energy",
-                "Final Energy",
-                "Drift (%)"
-        );
+        PhysicsEngine physicsEngine =
+                new PhysicsEngine();
 
-        System.out.println(
-                "---------------------------------------------------------------"
-        );
+        Integrator integrator =
+                new EulerIntegrator();
 
-        for (double dt : timeSteps) {
+        Simulation simulation =
+                new Simulation(
+                        bodies,
+                        physicsEngine,
+                        integrator
+                );
 
-            List<Body> bodies =
-                    SolarSystemScenario.createBodies();
+        Body sun = bodies.get(0);
+        Body earth = bodies.get(1);
+        Body moon = bodies.get(2);
 
-            PhysicsEngine physicsEngine =
-                    new PhysicsEngine();
+        OrbitData sunOrbit =
+                new OrbitData();
 
-            Integrator integrator =
-                    new EulerIntegrator();
+        OrbitData earthOrbit =
+                new OrbitData();
 
-            Simulation simulation =
-                    new Simulation(
-                            bodies,
-                            physicsEngine,
-                            integrator
-                    );
+        OrbitData moonOrbit =
+                new OrbitData();
 
-            double initialEnergy =
-                    physicsEngine.calculateTotalEnergy(
-                            bodies
-                    );
+        OrbitData moonRelativeOrbit =
+                new OrbitData();
 
-            int totalSteps = 1000;
+        double dt =
+                24 * 60 * 60;
 
-            for (int i = 0; i < totalSteps; i++) {
-                simulation.step(dt);
-            }
+        int totalSteps =
+                365;
 
-            double finalEnergy =
-                    physicsEngine.calculateTotalEnergy(
-                            bodies
-                    );
+        for (int day = 0;
+             day < totalSteps;
+             day++) {
 
-            double driftPercentage =
-                    Math.abs(
-                            finalEnergy - initialEnergy
-                    )
-                            / Math.abs(initialEnergy)
-                            * 100;
+            simulation.step(dt);
 
-            System.out.printf(
-                    "%-10.0f %-25.6e %-25.6e %-20.12e%n",
-                    dt,
-                    initialEnergy,
-                    finalEnergy,
-                    driftPercentage
+            sunOrbit.addPoint(
+                    sun.getPosition().getX(),
+                    sun.getPosition().getY()
+            );
+
+            earthOrbit.addPoint(
+                    earth.getPosition().getX(),
+                    earth.getPosition().getY()
+            );
+
+            moonOrbit.addPoint(
+                    moon.getPosition().getX(),
+                    moon.getPosition().getY()
+            );
+
+            moonRelativeOrbit.addPoint(
+                    moon.getPosition().getX()
+                            - earth.getPosition().getX(),
+                    moon.getPosition().getY()
+                            - earth.getPosition().getY()
             );
         }
 
-        System.out.println(
-                "---------------------------------------------------------------"
+        OrbitPlotter plotter =
+                new OrbitPlotter();
+
+        plotter.plotSolarSystem(
+                sunOrbit,
+                earthOrbit,
+                moonOrbit,
+                "Solar System - One Year"
         );
+
+        plotter.plotMoonRelativeOrbit(
+                moonRelativeOrbit
+        );
+
+        // -----------------------------
+        // Energy Drift Experiment
+        // -----------------------------
+
+        List<Double> dtValues =
+                List.of(
+                        1.0,
+                        2.0,
+                        5.0,
+                        10.0,
+                        20.0,
+                        50.0,
+                        100.0,
+                        200.0,
+                        500.0,
+                        1000.0
+                );
+
+        List<Double> driftValues =
+                new ArrayList<>();
+
+        for (double currentDt : dtValues) {
+
+            double drift =
+                    calculateDrift(
+                            currentDt
+                    );
+
+            driftValues.add(
+                    drift
+            );
+
+            System.out.println(
+                    "dt = "
+                            + currentDt
+                            + " drift = "
+                            + drift
+            );
+        }
+
+        EnergyDriftPlotter driftPlotter =
+                new EnergyDriftPlotter();
+
+        driftPlotter.plotEnergyDrift(
+                dtValues,
+                driftValues
+        );
+    }
+
+    private static double calculateDrift(
+            double dt
+    ) {
+
+        List<Body> bodies =
+                SolarSystemScenario.createBodies();
+
+        PhysicsEngine physicsEngine =
+                new PhysicsEngine();
+
+        Integrator integrator =
+                new EulerIntegrator();
+
+        Simulation simulation =
+                new Simulation(
+                        bodies,
+                        physicsEngine,
+                        integrator
+                );
+
+        double initialEnergy =
+                physicsEngine.calculateTotalEnergy(
+                        bodies
+                );
+
+        for (int i = 0;
+             i < 1000;
+             i++) {
+
+            simulation.step(dt);
+        }
+
+        double finalEnergy =
+                physicsEngine.calculateTotalEnergy(
+                        bodies
+                );
+
+        return Math.abs(
+                finalEnergy - initialEnergy
+        )
+                / Math.abs(
+                initialEnergy
+        )
+                * 100;
     }
 }
