@@ -35,6 +35,25 @@ public class Vector3 {
                 this.z * factor
         );
     }
+    public Vector3 divide(
+            double value
+    ) {
+
+        return new Vector3(
+                x / value,
+                y / value,
+                z / value
+        );
+    }
+    public Vector3 normalize() {
+        double magnitude = magnitude();
+
+        return new Vector3(
+                x / magnitude,
+                y / magnitude,
+                z / magnitude
+        );
+    }
 
     @Override
     public String toString() {
@@ -53,15 +72,7 @@ public class Vector3 {
         );
     }
 
-    public Vector3 normalize() {
-        double magnitude = magnitude();
 
-        return new Vector3(
-                x / magnitude,
-                y / magnitude,
-                z / magnitude
-        );
-    }
 
     public double getX() {
         return x;

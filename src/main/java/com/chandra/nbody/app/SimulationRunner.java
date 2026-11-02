@@ -2,6 +2,7 @@ package com.chandra.nbody.app;
 
 import com.chandra.nbody.integration.EulerIntegrator;
 import com.chandra.nbody.integration.Integrator;
+import com.chandra.nbody.integration.RK4Integrator;
 import com.chandra.nbody.model.Body;
 import com.chandra.nbody.physics.PhysicsEngine;
 import com.chandra.nbody.scenario.SolarSystemScenario;
@@ -28,7 +29,7 @@ public class SimulationRunner {
                 new PhysicsEngine();
 
         Integrator integrator =
-                new EulerIntegrator();
+                new RK4Integrator();
 
         Simulation simulation =
                 new Simulation(
@@ -52,6 +53,11 @@ public class SimulationRunner {
 
         OrbitData moonRelativeOrbit =
                 new OrbitData();
+        List<Double> eulerDriftValues =
+                new ArrayList<>();
+
+        List<Double> rk4DriftValues =
+                new ArrayList<>();
 
         double dt =
                 24 * 60 * 60;
@@ -103,7 +109,7 @@ public class SimulationRunner {
         );
 
         // -----------------------------
-        // Energy Drift Experiment
+        // Euler vs RK4 Energy Drift
         // -----------------------------
 
         List<Double> dtValues =
@@ -120,39 +126,53 @@ public class SimulationRunner {
                         1000.0
                 );
 
-        List<Double> driftValues =
-                new ArrayList<>();
+        System.out.println(
+                "\n===== ENERGY DRIFT COMPARISON ====="
+        );
 
         for (double currentDt : dtValues) {
 
-            double drift =
+            double eulerDrift =
                     calculateDrift(
-                            currentDt
+                            currentDt,
+                            new EulerIntegrator()
                     );
 
-            driftValues.add(
-                    drift
+            double rk4Drift =
+                    calculateDrift(
+                            currentDt,
+                            new RK4Integrator()
+                    );
+            eulerDriftValues.add(
+                    eulerDrift
+            );
+
+            rk4DriftValues.add(
+                    rk4Drift
             );
 
             System.out.println(
                     "dt = "
                             + currentDt
-                            + " drift = "
-                            + drift
+                            + " | Euler = "
+                            + eulerDrift
+                            + " | RK4 = "
+                            + rk4Drift
             );
         }
-
         EnergyDriftPlotter driftPlotter =
                 new EnergyDriftPlotter();
 
-        driftPlotter.plotEnergyDrift(
+        driftPlotter.plotEnergyDriftComparison(
                 dtValues,
-                driftValues
+                eulerDriftValues,
+                rk4DriftValues
         );
     }
 
     private static double calculateDrift(
-            double dt
+            double dt,
+            Integrator integrator
     ) {
 
         List<Body> bodies =
@@ -160,9 +180,6 @@ public class SimulationRunner {
 
         PhysicsEngine physicsEngine =
                 new PhysicsEngine();
-
-        Integrator integrator =
-                new EulerIntegrator();
 
         Simulation simulation =
                 new Simulation(
@@ -191,9 +208,8 @@ public class SimulationRunner {
         return Math.abs(
                 finalEnergy - initialEnergy
         )
-                / Math.abs(
-                initialEnergy
-        )
+                / Math.abs(initialEnergy)
                 * 100;
     }
+
 }

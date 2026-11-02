@@ -1,7 +1,10 @@
 package com.chandra.nbody.physics;
 
+import com.chandra.nbody.integration.Integrator;
 import com.chandra.nbody.model.Body;
 import com.chandra.nbody.model.Vector3;
+import com.chandra.nbody.scenario.SolarSystemScenario;
+import com.chandra.nbody.simulation.Simulation;
 
 import java.util.List;
 
@@ -114,6 +117,48 @@ public class PhysicsEngine {
         }
 
         return total;
+    }
+
+    private static double calculateDrift(
+            double dt,
+            Integrator integrator
+    ) {
+
+        List<Body> bodies =
+                SolarSystemScenario.createBodies();
+
+        PhysicsEngine physicsEngine =
+                new PhysicsEngine();
+
+        Simulation simulation =
+                new Simulation(
+                        bodies,
+                        physicsEngine,
+                        integrator
+                );
+
+        double initialEnergy =
+                physicsEngine.calculateTotalEnergy(
+                        bodies
+                );
+
+        for (int i = 0;
+             i < 1000;
+             i++) {
+
+            simulation.step(dt);
+        }
+
+        double finalEnergy =
+                physicsEngine.calculateTotalEnergy(
+                        bodies
+                );
+
+        return Math.abs(
+                finalEnergy - initialEnergy
+        )
+                / Math.abs(initialEnergy)
+                * 100;
     }
 
     public double calculateTotalEnergy(

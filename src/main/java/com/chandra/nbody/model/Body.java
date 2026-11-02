@@ -47,4 +47,22 @@ public class Body {
     ) {
         this.position = position;
     }
+
+    public Body copy() {
+
+        return new Body(
+                name,
+                mass,
+                new Vector3(
+                        position.getX(),
+                        position.getY(),
+                        position.getZ()
+                ),
+                new Vector3(
+                        velocity.getX(),
+                        velocity.getY(),
+                        velocity.getZ()
+                )
+        );
+    }
 }

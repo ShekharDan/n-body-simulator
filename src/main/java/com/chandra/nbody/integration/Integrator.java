@@ -1,13 +1,15 @@
 package com.chandra.nbody.integration;
 
 import com.chandra.nbody.model.Body;
-import com.chandra.nbody.model.Vector3;
+import com.chandra.nbody.physics.PhysicsEngine;
+
+import java.util.List;
 
 public interface Integrator {
 
     void integrate(
-            Body body,
-            Vector3 acceleration,
+            List<Body> bodies,
+            PhysicsEngine physicsEngine,
             double dt
     );
 }

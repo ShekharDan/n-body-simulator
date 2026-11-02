@@ -40,3 +40,4 @@ build/
 .DS_Store
 
 simulation-output/
+/PROJECT_CONTEXT.md
